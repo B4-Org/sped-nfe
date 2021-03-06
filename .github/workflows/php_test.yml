@@ -1,0 +1,35 @@
+name: Main - PHP Compose and Base of Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+        matrix:
+            operating-system: [ ubuntu-20.04 ]
+            php: ['7.1', '7.2', '7.3', '7.4' ]
+
+    name: PHP ${{ matrix.php }} ${{ matrix.operating-system }}
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Setup PHP
+      uses: nanasess/setup-php@v3.0.6
+      with:
+          php-version: ${{ matrix.php }}
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Execute PHP CS
+      run: vendor/bin/phpcs --standard=psr2 src/
+
+    - name: Execute PHPUnit
+      run: vendor/bin/phpunit
